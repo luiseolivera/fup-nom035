@@ -35,12 +35,6 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
           {/* Left: logo + title */}
           <div className="flex items-center gap-3 min-w-0">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: "#E9C46A" }}
-            >
-              <i className="ti ti-shield-check text-white text-base"></i>
-            </div>
             <div className="min-w-0">
               <p className="text-white font-bold text-sm leading-tight" style={{ maxWidth: "260px", whiteSpace: "normal", lineHeight: "1.2" }}>
                 Herramienta de seguimiento para el cumplimiento de la NOM-035-STPS-2018
