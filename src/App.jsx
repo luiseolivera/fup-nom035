@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useEmpresa } from "./hooks/useEmpresa";
-import { useStorage } from "./hooks/useStorage";
+import { useSupabaseData } from "./hooks/useSupabaseData";
 import { PASOS } from "./data/pasos";
 import Bienvenida from "./components/Bienvenida";
 import Header from "./components/Header";
@@ -14,26 +14,26 @@ export default function App() {
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
 
-  const storageKey = empresa ? `nom035_${empresa}` : null;
-
-  const [datos, setDatosRaw] = useStorage(
-    storageKey ? `${storageKey}_datos` : "__noop__",
-    { nombre: "", trabajadores: "", responsable: "", fechaInicio: "" }
-  );
-  const [checklist, setChecklistRaw] = useStorage(
-    storageKey ? `${storageKey}_checklist` : "__noop__",
-    {}
-  );
-  const [notas, setNotasRaw] = useStorage(
-    storageKey ? `${storageKey}_notas` : "__noop__",
-    {}
-  );
-  const [comentarios, setComentariosRaw] = useStorage(
-    storageKey ? `${storageKey}_comentarios` : "__noop__",
-    {}
-  );
+  const {
+    loading,
+    datos, setDatos,
+    checklist, setChecklist,
+    notas, setNotas,
+    comentarios, setComentarios,
+  } = useSupabaseData(empresa);
 
   if (!empresa) return <Bienvenida />;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8fafc" }}>
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-700 rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-sm text-gray-500">Cargando datos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#f8fafc" }}>
@@ -44,7 +44,7 @@ export default function App() {
         onHelp={() => setModalAyuda(true)}
       />
 
-      <EmpresaBar datos={datos} setDatos={setDatosRaw} rol={rol} />
+      <EmpresaBar datos={datos} setDatos={setDatos} rol={rol} />
 
       <main className="flex-1 pb-12">
         <Dashboard checklist={checklist} datos={datos} />
@@ -55,11 +55,11 @@ export default function App() {
               key={paso.id}
               paso={paso}
               checklist={checklist}
-              setChecklist={setChecklistRaw}
+              setChecklist={setChecklist}
               notas={notas}
-              setNotas={setNotasRaw}
+              setNotas={setNotas}
               comentarios={comentarios}
-              setComentarios={setComentariosRaw}
+              setComentarios={setComentarios}
               rol={rol}
             />
           ))}
