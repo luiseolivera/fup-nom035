@@ -12,9 +12,16 @@ export default function ComentariosConsultor({ pasoId, comentarios, setComentari
       style={{ background: "#E6F1FB" }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <i className="ti ti-briefcase text-blue-400 text-base"></i>
+        <a
+          href="https://www.consentidohumano.com"
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-semibold text-blue-500 hover:underline"
+        >
+          www.consentidohumano.com
+        </a>
         <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-          Recomendación del consultor
+          · Comentarios del consultor
         </span>
       </div>
       {editable ? (
