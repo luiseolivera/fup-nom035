@@ -1,7 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "../lib/supabase";
 
-const DEBOUNCE_MS = 800;
+async function upsertField(empresa, field, value) {
+  await supabase
+    .from("nom035_seguimiento")
+    .upsert(
+      { empresa, [field]: value, updated_at: new Date().toISOString() },
+      { onConflict: "empresa" }
+    );
+}
 
 export function useSupabaseData(empresa) {
   const [datos, setDatosState] = useState({});
@@ -9,7 +16,7 @@ export function useSupabaseData(empresa) {
   const [notas, setNotasState] = useState({});
   const [comentarios, setComentariosState] = useState({});
   const [loading, setLoading] = useState(true);
-  const timers = useRef({});
+  const textTimers = useRef({});
 
   // Load data on mount
   useEffect(() => {
@@ -30,38 +37,41 @@ export function useSupabaseData(empresa) {
       });
   }, [empresa]);
 
-  function save(field, value) {
-    clearTimeout(timers.current[field]);
-    timers.current[field] = setTimeout(() => {
-      supabase
-        .from("nom035_seguimiento")
-        .upsert({ empresa, [field]: value, updated_at: new Date().toISOString() }, { onConflict: "empresa" });
-    }, DEBOUNCE_MS);
+  // Checklist: save immediately (binary toggle, no debounce needed)
+  const setChecklist = useCallback((val) => {
+    setChecklistState((prev) => {
+      const resolved = typeof val === "function" ? val(prev) : val;
+      upsertField(empresa, "checklist", resolved);
+      return resolved;
+    });
+  }, [empresa]);
+
+  // Text fields: debounce 1s to avoid too many requests while typing
+  function makeTextSetter(stateSetter, field, stateRef) {
+    return (val) => {
+      stateSetter((prev) => {
+        const resolved = typeof val === "function" ? val(prev) : val;
+        clearTimeout(textTimers.current[field]);
+        textTimers.current[field] = setTimeout(() => {
+          upsertField(empresa, field, resolved);
+        }, 1000);
+        return resolved;
+      });
+    };
   }
 
-  function setDatos(val) {
-    const resolved = typeof val === "function" ? val(datos) : val;
-    setDatosState(resolved);
-    save("datos", resolved);
-  }
+  const setDatos = useCallback(makeTextSetter(setDatosState, "datos"), [empresa]);
+  const setNotas = useCallback(makeTextSetter(setNotasState, "notas"), [empresa]);
+  const setComentarios = useCallback(makeTextSetter(setComentariosState, "comentarios"), [empresa]);
 
-  function setChecklist(val) {
-    const resolved = typeof val === "function" ? val(checklist) : val;
-    setChecklistState(resolved);
-    save("checklist", resolved);
-  }
-
-  function setNotas(val) {
-    const resolved = typeof val === "function" ? val(notas) : val;
-    setNotasState(resolved);
-    save("notas", resolved);
-  }
-
-  function setComentarios(val) {
-    const resolved = typeof val === "function" ? val(comentarios) : val;
-    setComentariosState(resolved);
-    save("comentarios", resolved);
-  }
+  // Flush pending text saves before page unload
+  useEffect(() => {
+    function flush() {
+      Object.values(textTimers.current).forEach(clearTimeout);
+    }
+    window.addEventListener("beforeunload", flush);
+    return () => window.removeEventListener("beforeunload", flush);
+  }, []);
 
   return {
     loading,
