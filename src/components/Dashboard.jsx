@@ -14,7 +14,15 @@ export default function Dashboard({ checklist, datos }) {
   const enProceso = estadosPasos.filter((e) => e === "en-proceso").length;
   const pendientes = estadosPasos.filter((e) => e === "pendiente").length;
   const total = PASOS.length;
-  const pct = Math.round((completados / total) * 100);
+
+  // Progreso real: promedio del % de avance de cada paso
+  const pct = Math.round(
+    PASOS.reduce((sum, paso) => {
+      const totalActs = paso.actividades.length;
+      const completadas = paso.actividades.filter((a) => checklist[a.id]).length;
+      return sum + completadas / totalActs;
+    }, 0) / total * 100
+  );
 
   const fechaInicio = datos.fechaInicio ? new Date(datos.fechaInicio) : null;
   const diasTranscurridos = fechaInicio
