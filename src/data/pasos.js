@@ -17,11 +17,14 @@ export const PASOS = [
       },
       {
         id: "1-3",
-        texto: "Generar el reporte de encuestas con los elementos requeridos por NOM-035",
+        texto: "Generar el reporte de encuestas con los elementos requeridos por NOM-035 y las recomendaciones del consultor.",
+        link: "https://ui-nom035.s3.us-east-2.amazonaws.com/portada-enc.pdf",
+        linkLabel: "Abrir portada-enc.pdf",
       },
       {
         id: "1-4",
-        texto: "Integrar los resultados al diagnóstico de seguridad y salud en el trabajo",
+        texto: "Integrar los resultados al diagnóstico de seguridad y salud en el trabajo. Incluye el resultado global.",
+        nota: "Se recomienda hacer una carta dirigida al responsable de la comisión de seguridad e higiene entregando el resultado de las encuestas y con firma de recibido.",
       },
     ],
   },

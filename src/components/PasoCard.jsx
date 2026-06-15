@@ -131,6 +131,11 @@ export default function PasoCard({
                       {act.linkLabel || "Abrir formato/recurso"}
                     </a>
                   )}
+                  {act.nota && (
+                    <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>
+                      ({act.nota})
+                    </p>
+                  )}
                 </div>
               </li>
             ))}
