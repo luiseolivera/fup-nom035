@@ -12,29 +12,21 @@ export default function ComentariosConsultor({ pasoId, comentarios, setComentari
       style={{ background: "#E6F1FB" }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <a
-          href="https://www.consentidohumano.com"
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs font-semibold text-blue-500 hover:underline"
-        >
-          www.consentidohumano.com
-        </a>
+        <i className="ti ti-briefcase text-blue-400 text-base"></i>
         <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-          · Comentarios del consultor
+          Comentarios del consultor
         </span>
       </div>
       {editable ? (
         <textarea
           rows={3}
           className="w-full text-sm border border-blue-200 rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
-          placeholder="Escribe aquí tu recomendación para este paso..."
           value={valor}
           onChange={handleChange}
         />
       ) : (
         <p className="text-sm text-blue-700 italic min-h-[3rem]">
-          {valor || "Sin recomendaciones del consultor."}
+          {valor || ""}
         </p>
       )}
     </div>
