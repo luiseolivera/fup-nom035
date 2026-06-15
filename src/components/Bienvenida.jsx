@@ -25,16 +25,8 @@ export default function Bienvenida() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 text-center">
-        {/* Logo / branding */}
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-          style={{ background: "#1D3557" }}
-        >
-          <i className="ti ti-shield-check text-white text-3xl"></i>
-        </div>
-        <p className="text-sm font-semibold uppercase tracking-widest mb-1" style={{ color: "#1D3557" }}>
-          CRESE
-        </p>
+        {/* Logo */}
+        <img src="/logo.png" alt="Logo" className="mx-auto mb-6 w-64 object-contain" />
         <h1 className="text-2xl font-bold mb-1" style={{ color: "#1D3557" }}>
           NOM-035-STPS-2018
         </h1>
