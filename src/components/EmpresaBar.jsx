@@ -1,5 +1,5 @@
 export default function EmpresaBar({ datos, setDatos, rol }) {
-  const editable = rol === "responsable" || rol === "consultor";
+  const editable = rol === "consultor";
 
   function handle(field) {
     return (e) => setDatos((prev) => ({ ...prev, [field]: e.target.value }));
