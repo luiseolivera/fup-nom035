@@ -36,22 +36,22 @@ export default function Bienvenida() {
           CRESE
         </p>
         <h1 className="text-2xl font-bold mb-1" style={{ color: "#1D3557" }}>
-          Seguimiento NOM-035-STPS-2018
+          NOM-035-STPS-2018
         </h1>
         <p className="text-gray-500 text-sm mb-8">
-          Herramienta de cumplimiento para centros de trabajo mexicanos
+          Herramienta de seguimiento
         </p>
 
         <form onSubmit={handleSubmit} className="text-left space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Identificador de empresa
+              Identificador de Centro de Trabajo
             </label>
             <input
               type="text"
               value={slug}
               onChange={handleChange}
-              placeholder="ej: magma-automotive"
+              placeholder=""
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
               style={{ "--tw-ring-color": "#1D3557" }}
             />
@@ -71,10 +71,6 @@ export default function Bienvenida() {
           </button>
         </form>
 
-        <p className="text-xs text-gray-400 mt-6 leading-relaxed">
-          Este identificador forma parte del enlace que compartirás con el
-          director y el consultor de la empresa.
-        </p>
       </div>
 
       <footer className="mt-8 text-xs text-gray-400 text-center">
