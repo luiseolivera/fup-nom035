@@ -29,7 +29,7 @@ export default function PasoCard({
   const [open, setOpen] = useState(false);
   const estado = getEstado(paso, checklist);
   const s = ESTADO_STYLES[estado];
-  const canCheck = rol === "responsable";
+  const canCheck = rol === "responsable" || rol === "consultor";
 
   const completadas = paso.actividades.filter((a) => checklist[a.id]).length;
   const total = paso.actividades.length;
