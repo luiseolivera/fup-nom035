@@ -65,18 +65,6 @@ export default function Bienvenida() {
 
       </div>
 
-      <footer className="mt-8 text-xs text-gray-400 text-center">
-        Consejo Latinoamericano de Calidad Humana y Responsabilidad Social, A.C.
-        ·{" "}
-        <a
-          href="https://consentidohumano.com"
-          target="_blank"
-          rel="noreferrer"
-          className="underline"
-        >
-          consentidohumano.com
-        </a>
-      </footer>
     </div>
   );
 }

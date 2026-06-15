@@ -31,8 +31,8 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
             <i className="ti ti-shield-check text-white text-base"></i>
           </div>
           <div className="min-w-0">
-            <p className="text-white font-bold text-sm leading-tight truncate">
-              NOM-035
+            <p className="text-white font-bold text-sm leading-tight" style={{ maxWidth: "260px", whiteSpace: "normal", lineHeight: "1.2" }}>
+              Herramienta de seguimiento para el cumplimiento de la NOM-035-STPS-2018
             </p>
             <p className="text-xs leading-tight truncate" style={{ color: "#E9C46A" }}>
               {empresa}
