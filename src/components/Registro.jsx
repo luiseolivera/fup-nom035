@@ -44,7 +44,7 @@ export default function Registro({ empresa, onVerified }) {
   async function handleVerifyOtp(e) {
     e.preventDefault();
     setError("");
-    if (otp.length !== 6) return setError("El código debe tener 6 dígitos.");
+    if (otp.length < 6) return setError("Por favor ingresa el código completo.");
     setLoading(true);
     const { data, error } = await supabase.auth.verifyOtp({
       email: form.correo,
@@ -208,9 +208,9 @@ export default function Registro({ empresa, onVerified }) {
               <input
                 className={`${inputCls} text-center text-2xl tracking-widest font-bold`}
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
                 placeholder="000000"
-                maxLength={6}
+                maxLength={8}
                 autoFocus
               />
             </div>
@@ -223,7 +223,7 @@ export default function Registro({ empresa, onVerified }) {
 
             <button
               type="submit"
-              disabled={loading || otp.length !== 6}
+              disabled={loading || otp.length < 6}
               className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition disabled:opacity-60"
               style={{ background: "#1D3557" }}
             >
