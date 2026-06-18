@@ -1,39 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useEmpresa } from "./hooks/useEmpresa";
+import { useAuth } from "./hooks/useAuth";
 import { useSupabaseData } from "./hooks/useSupabaseData";
+import { supabase } from "./lib/supabase";
 import { PASOS } from "./data/pasos";
 import Bienvenida from "./components/Bienvenida";
+import Registro from "./components/Registro";
 import Header from "./components/Header";
 import EmpresaBar from "./components/EmpresaBar";
 import Dashboard from "./components/Dashboard";
 import PasoCard from "./components/PasoCard";
 import ModalAyuda from "./components/ModalAyuda";
 
+function Spinner({ texto }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8fafc" }}>
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-700 rounded-full animate-spin mx-auto mb-3"></div>
+        <p className="text-sm text-gray-500">{texto || "Cargando..."}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const empresa = useEmpresa();
+  const { session, loading: authLoading } = useAuth();
+  const [tienePerfil, setTienePerfil] = useState(null); // null=checking, true, false
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
 
   const {
-    loading,
+    loading: dataLoading,
     datos, setDatos,
     checklist, setChecklist,
     notas, setNotas,
     comentarios, setComentarios,
-  } = useSupabaseData(empresa);
+  } = useSupabaseData(empresa && session ? empresa : null);
+
+  // Check if authenticated user has a profile for this empresa
+  useEffect(() => {
+    if (!empresa || !session) { setTienePerfil(false); return; }
+    supabase
+      .from("perfiles")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .eq("empresa", empresa)
+      .maybeSingle()
+      .then(({ data }) => setTienePerfil(!!data));
+  }, [empresa, session]);
 
   if (!empresa) return <Bienvenida />;
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#f8fafc" }}>
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-700 rounded-full animate-spin mx-auto mb-3"></div>
-          <p className="text-sm text-gray-500">Cargando datos...</p>
-        </div>
-      </div>
-    );
-  }
+  if (authLoading || tienePerfil === null) return <Spinner texto="Verificando acceso..." />;
+  if (!session || !tienePerfil) return <Registro empresa={empresa} onVerified={() => setTienePerfil(true)} />;
+  if (dataLoading) return <Spinner texto="Cargando datos..." />;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#f8fafc" }}>
@@ -69,12 +89,7 @@ export default function App() {
       <footer className="text-center text-xs text-gray-400 py-6 border-t border-gray-200 bg-white">
         Consejo Latinoamericano de Calidad Humana y Responsabilidad Social, A.C.
         ·{" "}
-        <a
-          href="https://consentidohumano.com"
-          target="_blank"
-          rel="noreferrer"
-          className="underline hover:text-gray-600"
-        >
+        <a href="https://consentidohumano.com" target="_blank" rel="noreferrer" className="underline hover:text-gray-600">
           consentidohumano.com
         </a>
       </footer>
