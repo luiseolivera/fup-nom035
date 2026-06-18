@@ -68,6 +68,17 @@ export default function Registro({ empresa, onVerified }) {
       },
       { onConflict: "user_id,empresa" }
     );
+    // Notify admin
+    supabase.functions.invoke("notificar-registro", {
+      body: {
+        empresa,
+        nombre_empresa: form.nombreEmpresa,
+        nombre_persona: form.nombrePersona,
+        puesto: form.puesto,
+        correo: form.correo,
+        whatsapp: form.whatsapp,
+      },
+    });
     setLoading(false);
     onVerified();
   }
