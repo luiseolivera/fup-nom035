@@ -1,10 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useEmpresa } from "./hooks/useEmpresa";
-import { useAuth } from "./hooks/useAuth";
 import { useSupabaseData } from "./hooks/useSupabaseData";
-import { supabase } from "./lib/supabase";
 import { PASOS } from "./data/pasos";
-import Bienvenida from "./components/Bienvenida";
 import Registro from "./components/Registro";
 import Header from "./components/Header";
 import EmpresaBar from "./components/EmpresaBar";
@@ -25,12 +22,8 @@ function Spinner({ texto }) {
 
 export default function App() {
   const empresa = useEmpresa();
-  const { session, loading: authLoading } = useAuth();
-  const [empresaRegistrada, setEmpresaRegistrada] = useState(null); // null=checking
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
-
-  const puedeEntrar = session || empresaRegistrada;
 
   const {
     loading: dataLoading,
@@ -38,24 +31,10 @@ export default function App() {
     checklist, setChecklist,
     notas, setNotas,
     comentarios, setComentarios,
-  } = useSupabaseData(empresa && puedeEntrar ? empresa : null);
+  } = useSupabaseData(empresa || null);
 
-  // Check if this empresa has ever been registered
-  useEffect(() => {
-    if (!empresa) return;
-    supabase
-      .from("perfiles")
-      .select("id")
-      .eq("empresa", empresa)
-      .limit(1)
-      .then(({ data }) => setEmpresaRegistrada(data && data.length > 0));
-  }, [empresa]);
-
-  if (!empresa) return <Bienvenida />;
-  // Wait for both auth and empresa check
-  if (authLoading || empresaRegistrada === null) return <Spinner texto="Verificando acceso..." />;
-  // Show registration only if: no session AND empresa never registered
-  if (!puedeEntrar) return <Registro empresa={empresa} onVerified={() => setEmpresaRegistrada(true)} />;
+  // No empresa in URL → show registration with empresa field
+  if (!empresa) return <Registro />;
   if (dataLoading) return <Spinner texto="Cargando datos..." />;
 
   return (

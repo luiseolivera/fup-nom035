@@ -65,7 +65,7 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
             </button>
 
             <button
-              onClick={() => supabase.auth.signOut()}
+              onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
               className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
               title="Cerrar sesión"
             >
