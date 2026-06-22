@@ -38,7 +38,7 @@ export default function App() {
     comentarios, setComentarios,
   } = useSupabaseData(empresa && session ? empresa : null);
 
-  // Check if authenticated user has a profile for this empresa
+  // If user has a session, auto-create profile for this empresa if missing
   useEffect(() => {
     if (!empresa || !session) { setTienePerfil(false); return; }
     supabase
@@ -47,7 +47,14 @@ export default function App() {
       .eq("user_id", session.user.id)
       .eq("empresa", empresa)
       .maybeSingle()
-      .then(({ data }) => setTienePerfil(!!data));
+      .then(async ({ data }) => {
+        if (data) { setTienePerfil(true); return; }
+        await supabase.from("perfiles").upsert(
+          { user_id: session.user.id, empresa },
+          { onConflict: "user_id,empresa" }
+        );
+        setTienePerfil(true);
+      });
   }, [empresa, session]);
 
   if (!empresa) return <Bienvenida />;
