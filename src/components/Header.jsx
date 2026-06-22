@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ModalPassword from "./ModalPassword";
+import { supabase } from "../lib/supabase";
 
 const ROLES = [
   { id: "responsable", label: "Responsable", icon: "ti-user" },
@@ -61,6 +62,15 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
               title="Ayuda"
             >
               ?
+            </button>
+
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
+              title="Cerrar sesión"
+            >
+              <i className="ti ti-logout text-sm"></i>
+              <span className="hidden sm:inline">Salir</span>
             </button>
 
             {/* Role toggle */}
