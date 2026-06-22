@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useEmpresa } from "./hooks/useEmpresa";
-import { useAuth } from "./hooks/useAuth";
 import { useSupabaseData } from "./hooks/useSupabaseData";
 import { supabase } from "./lib/supabase";
 import { PASOS } from "./data/pasos";
@@ -25,8 +24,7 @@ function Spinner({ texto }) {
 
 export default function App() {
   const empresa = useEmpresa();
-  const { session, loading: authLoading } = useAuth();
-  const [tienePerfil, setTienePerfil] = useState(null); // null=checking, true, false
+  const [registrada, setRegistrada] = useState(null); // null=checking, true, false
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
 
@@ -36,30 +34,22 @@ export default function App() {
     checklist, setChecklist,
     notas, setNotas,
     comentarios, setComentarios,
-  } = useSupabaseData(empresa && session ? empresa : null);
+  } = useSupabaseData(empresa && registrada ? empresa : null);
 
-  // If user has a session, auto-create profile for this empresa if missing
+  // Check if this empresa has ever been registered (has any profile)
   useEffect(() => {
-    if (!empresa || !session) { setTienePerfil(false); return; }
+    if (!empresa) return;
     supabase
       .from("perfiles")
       .select("id")
-      .eq("user_id", session.user.id)
       .eq("empresa", empresa)
-      .maybeSingle()
-      .then(async ({ data }) => {
-        if (data) { setTienePerfil(true); return; }
-        await supabase.from("perfiles").upsert(
-          { user_id: session.user.id, empresa },
-          { onConflict: "user_id,empresa" }
-        );
-        setTienePerfil(true);
-      });
-  }, [empresa, session]);
+      .limit(1)
+      .then(({ data }) => setRegistrada(data && data.length > 0));
+  }, [empresa]);
 
   if (!empresa) return <Bienvenida />;
-  if (authLoading || tienePerfil === null) return <Spinner texto="Verificando acceso..." />;
-  if (!session || !tienePerfil) return <Registro empresa={empresa} onVerified={() => setTienePerfil(true)} />;
+  if (registrada === null) return <Spinner texto="Verificando acceso..." />;
+  if (!registrada) return <Registro empresa={empresa} onVerified={() => setRegistrada(true)} />;
   if (dataLoading) return <Spinner texto="Cargando datos..." />;
 
   return (
