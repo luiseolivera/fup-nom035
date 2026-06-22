@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useEmpresa } from "./hooks/useEmpresa";
+import { useAuth } from "./hooks/useAuth";
 import { useSupabaseData } from "./hooks/useSupabaseData";
 import { supabase } from "./lib/supabase";
 import { PASOS } from "./data/pasos";
@@ -24,9 +25,12 @@ function Spinner({ texto }) {
 
 export default function App() {
   const empresa = useEmpresa();
-  const [registrada, setRegistrada] = useState(null); // null=checking, true, false
+  const { session, loading: authLoading } = useAuth();
+  const [empresaRegistrada, setEmpresaRegistrada] = useState(null); // null=checking
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
+
+  const puedeEntrar = session || empresaRegistrada;
 
   const {
     loading: dataLoading,
@@ -34,9 +38,9 @@ export default function App() {
     checklist, setChecklist,
     notas, setNotas,
     comentarios, setComentarios,
-  } = useSupabaseData(empresa && registrada ? empresa : null);
+  } = useSupabaseData(empresa && puedeEntrar ? empresa : null);
 
-  // Check if this empresa has ever been registered (has any profile)
+  // Check if this empresa has ever been registered
   useEffect(() => {
     if (!empresa) return;
     supabase
@@ -44,12 +48,14 @@ export default function App() {
       .select("id")
       .eq("empresa", empresa)
       .limit(1)
-      .then(({ data }) => setRegistrada(data && data.length > 0));
+      .then(({ data }) => setEmpresaRegistrada(data && data.length > 0));
   }, [empresa]);
 
   if (!empresa) return <Bienvenida />;
-  if (registrada === null) return <Spinner texto="Verificando acceso..." />;
-  if (!registrada) return <Registro empresa={empresa} onVerified={() => setRegistrada(true)} />;
+  // Wait for both auth and empresa check
+  if (authLoading || empresaRegistrada === null) return <Spinner texto="Verificando acceso..." />;
+  // Show registration only if: no session AND empresa never registered
+  if (!puedeEntrar) return <Registro empresa={empresa} onVerified={() => setEmpresaRegistrada(true)} />;
   if (dataLoading) return <Spinner texto="Cargando datos..." />;
 
   return (
