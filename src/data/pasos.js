@@ -148,7 +148,7 @@ export const PASOS = [
       { id: "4-i-3d", seccion: "i", texto: "Desarrollar:", tipo: "nota" },
 
       // 8.1b — Mecanismos para quejas
-      { id: "4-j-1", seccion: "j", seccionTitulo: "8.1 b. Mecanismos seguros y confidenciales para quejas y denuncias:", texto: "¿Dispone de mecanismos seguros y confidenciales para la recepción de quejas por prácticas opuestas al entorno organizacional favorable y para denunciar actos de violencia laboral?", tipo: "radio4" },
+      { id: "4-j-1", seccion: "j", seccionTitulo: "8.1 b. Mecanismos seguros y confidenciales para quejas y denuncias:", texto: "¿Dispone de mecanismos seguros y confidenciales para la recepción de quejas por prácticas opuestas al entorno organizacional favorable y para denunciar actos de violencia laboral?" },
     ],
   },
   {
