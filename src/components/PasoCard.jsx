@@ -12,8 +12,8 @@ function getEstado(paso, checklist) {
 }
 
 const ESTADO_STYLES = {
-  pendiente: { bg: "#f1f5f9", text: "#64748b", label: "Pendiente", dot: "#94a3b8" },
-  "en-proceso": { bg: "#fefce8", text: "#b45309", label: "En proceso", dot: "#E9C46A" },
+  pendiente: { bg: "#fef2f2", text: "#ef4444", label: "Pendiente", dot: "#ef4444" },
+  "en-proceso": { bg: "#fff7ed", text: "#f97316", label: "En proceso", dot: "#f97316" },
   completado: { bg: "#f0fdf4", text: "#15803d", label: "Completado", dot: "#22c55e" },
 };
 
