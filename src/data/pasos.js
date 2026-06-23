@@ -74,7 +74,7 @@ export const PASOS = [
   },
   {
     id: 4,
-    titulo: "Elaborar el diagnóstico de programas preventivos",
+    titulo: "Implementación de programas preventivos",
     actividades: [
       // 8.2a — Liderazgo y relaciones
       { id: "4-a-1", seccion: "a", seccionTitulo: "8.2 a. Con relación al liderazgo y relaciones en el trabajo se cuenta con:", seccionLink: "https://ui-nom035.s3.us-east-2.amazonaws.com/Minuta_Reunion_Semanal.pdf", seccionLinkLabel: "Formato de reuniones semanales (cumple puntos 1, 3 y 4)", texto: "1. Acciones para manejar los conflictos en el trabajo, distribuir los tiempos de trabajo y determinar las prioridades en el trabajo", nota: "Se podría encontrar en el Reglamento Interior de Trabajo y/o en un Manual de Operaciones" },
