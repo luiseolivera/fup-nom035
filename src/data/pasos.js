@@ -149,19 +149,6 @@ export const PASOS = [
 
       // 8.1b — Mecanismos para quejas
       { id: "4-j-1", seccion: "j", seccionTitulo: "8.1 b. Mecanismos seguros y confidenciales para quejas y denuncias:", texto: "¿Dispone de mecanismos seguros y confidenciales para la recepción de quejas por prácticas opuestas al entorno organizacional favorable y para denunciar actos de violencia laboral?", tipo: "radio4" },
-
-      // 5.7 — Difusión
-      { id: "4-k-1", seccion: "k", seccionTitulo: "Difusión (5.7) · Se difunde lo siguiente:", texto: "La política de prevención de riesgos psicosociales (RPS)", tipo: "radio4" },
-      { id: "4-k-2", seccion: "k", texto: "Las medidas adoptadas para combatir las prácticas opuestas al entorno organizacional favorable y actos de violencia laboral", tipo: "radio4" },
-      { id: "4-k-3", seccion: "k", texto: "Las medidas y acciones de prevención y, en su caso, las acciones de control de los factores de RPS", tipo: "radio4" },
-      { id: "4-k-4", seccion: "k", texto: "Los mecanismos para presentar quejas por prácticas opuestas al entorno organizacional favorable y para denunciar actos de violencia laboral", tipo: "radio4" },
-      { id: "4-k-5", seccion: "k", texto: "Los resultados de las encuestas que aplique según la Norma", tipo: "radio4" },
-      { id: "4-k-6", seccion: "k", texto: "Las posibles alteraciones a la salud por la exposición a los factores de RPS", tipo: "radio4" },
-
-      // 5.8 — Registros
-      { id: "4-l-1", seccion: "l", seccionTitulo: "Registros (5.8) · Se cuenta con registros de los siguientes:", texto: "Los resultados de las encuestas que aplique, de acuerdo con la Norma", tipo: "radio4" },
-      { id: "4-l-2", seccion: "l", texto: "Las medidas de control que apliquen, de acuerdo con la Norma", tipo: "radio4" },
-      { id: "4-l-3", seccion: "l", texto: "Los nombres de los trabajadores a los que se les practicaron los exámenes o evaluaciones clínicas", tipo: "radio4" },
     ],
   },
   {
