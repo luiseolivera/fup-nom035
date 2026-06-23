@@ -24,7 +24,7 @@ function ActividadNota({ act, notas, setNotas, rol }) {
   const valor = notas[act.id] || "";
   return (
     <li className="flex flex-col gap-1 pl-8">
-      <span className="text-xs text-gray-400 italic">{act.texto}</span>
+      <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Notas del responsable</span>
       {editable ? (
         <textarea
           rows={2}
