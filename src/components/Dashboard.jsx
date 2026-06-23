@@ -67,9 +67,10 @@ export default function Dashboard({ checklist, datos }) {
           <div className="flex items-end gap-2 h-32">
             {PASOS.map((paso, i) => {
               const p = pasosPct[i];
+              const color = p === 0 ? "#ef4444" : p < 40 ? "#f97316" : p < 75 ? "#E9C46A" : p < 100 ? "#3b82f6" : "#22c55e";
               return (
                 <div key={paso.id} className="flex-1 flex flex-col items-center gap-1">
-                  <span className="text-xs font-semibold" style={{ color: p === 100 ? "#15803d" : p > 0 ? "#b45309" : "#94a3b8" }}>
+                  <span className="text-xs font-semibold" style={{ color }}>
                     {p}%
                   </span>
                   <div className="w-full bg-gray-100 rounded-t-md overflow-hidden" style={{ height: "80px" }}>
@@ -78,7 +79,7 @@ export default function Dashboard({ checklist, datos }) {
                       style={{
                         height: `${p}%`,
                         marginTop: `${100 - p}%`,
-                        background: p === 100 ? "#22c55e" : p > 0 ? "#E9C46A" : "#e5e7eb",
+                        background: color,
                       }}
                     />
                   </div>
@@ -87,13 +88,7 @@ export default function Dashboard({ checklist, datos }) {
               );
             })}
           </div>
-          <div className="mt-2 space-y-0.5">
-            {PASOS.map((paso, i) => (
-              <p key={paso.id} className="text-xs text-gray-400">
-                <span className="font-semibold text-gray-600">{paso.id}.</span> {paso.titulo}
-              </p>
-            ))}
-          </div>
+          <p className="mt-3 text-xs text-gray-400 text-center">Avance por cada punto</p>
         </div>
       </div>
 
