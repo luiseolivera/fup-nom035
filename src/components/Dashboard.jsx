@@ -62,31 +62,38 @@ export default function Dashboard({ checklist, datos }) {
           </div>
         )}
 
-        {/* Barras por paso */}
-        <div className="mt-4 space-y-2 border-t border-gray-100 pt-4">
-          {PASOS.map((paso, i) => {
-            const p = pasosPct[i];
-            return (
-              <div key={paso.id} className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 w-44 truncate flex-shrink-0">
-                  <span className="font-semibold text-gray-700 mr-1">{paso.id}.</span>
-                  {paso.titulo}
-                </span>
-                <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-2 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${p}%`,
-                      background: p === 100 ? "#22c55e" : p > 0 ? "#E9C46A" : "#e5e7eb",
-                    }}
-                  />
+        {/* Barras verticales por paso */}
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="flex items-end gap-2 h-32">
+            {PASOS.map((paso, i) => {
+              const p = pasosPct[i];
+              return (
+                <div key={paso.id} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs font-semibold" style={{ color: p === 100 ? "#15803d" : p > 0 ? "#b45309" : "#94a3b8" }}>
+                    {p}%
+                  </span>
+                  <div className="w-full bg-gray-100 rounded-t-md overflow-hidden" style={{ height: "80px" }}>
+                    <div
+                      className="w-full rounded-t-md transition-all duration-500"
+                      style={{
+                        height: `${p}%`,
+                        marginTop: `${100 - p}%`,
+                        background: p === 100 ? "#22c55e" : p > 0 ? "#E9C46A" : "#e5e7eb",
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-gray-600">{paso.id}</span>
                 </div>
-                <span className="text-xs font-semibold w-9 text-right flex-shrink-0" style={{ color: p === 100 ? "#15803d" : "#b45309" }}>
-                  {p}%
-                </span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+          <div className="mt-2 space-y-0.5">
+            {PASOS.map((paso, i) => (
+              <p key={paso.id} className="text-xs text-gray-400">
+                <span className="font-semibold text-gray-600">{paso.id}.</span> {paso.titulo}
+              </p>
+            ))}
+          </div>
         </div>
       </div>
 
