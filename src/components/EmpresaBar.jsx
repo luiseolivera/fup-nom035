@@ -11,7 +11,7 @@ export default function EmpresaBar({ datos, setDatos, rol }) {
   return (
     <div className="bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-5xl mx-auto px-4 py-4">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-3">
           Datos del centro de trabajo
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
