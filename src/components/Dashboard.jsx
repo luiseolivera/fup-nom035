@@ -68,6 +68,7 @@ export default function Dashboard({ checklist, datos }) {
             {PASOS.map((paso, i) => {
               const p = pasosPct[i];
               const color = p === 0 ? "#ef4444" : p < 40 ? "#f97316" : p < 75 ? "#E9C46A" : p < 100 ? "#3b82f6" : "#22c55e";
+              const abrev = ["Encuestas", "Validar respuestas", "Formato acciones correctivas", "Programas preventivos", "Difusión", "Buzón de quejas", "Carpeta y dictamen"][i];
               return (
                 <div key={paso.id} className="flex-1 flex flex-col items-center gap-1">
                   <span className="text-xs font-semibold" style={{ color }}>
@@ -84,6 +85,7 @@ export default function Dashboard({ checklist, datos }) {
                     />
                   </div>
                   <span className="text-xs font-bold text-gray-600">{paso.id}</span>
+                  <span className="text-center leading-tight" style={{ fontSize: "9px", color: "#9ca3af", maxWidth: "100%" }}>{abrev}</span>
                 </div>
               );
             })}
