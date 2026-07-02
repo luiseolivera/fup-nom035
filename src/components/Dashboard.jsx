@@ -92,12 +92,6 @@ export default function Dashboard({ checklist, datos }) {
         </div>
       </div>
 
-      {/* Tarjetas de estado */}
-      <div className="grid grid-cols-3 gap-3">
-        <MetricCard label="Completados" value={completados} total={total} color="#22c55e" icon="ti-circle-check" />
-        <MetricCard label="En proceso" value={enProceso} total={total} color="#f97316" icon="ti-progress" />
-        <MetricCard label="Pendientes" value={pendientes} total={total} color="#ef4444" icon="ti-circle" />
-      </div>
     </div>
   );
 }
