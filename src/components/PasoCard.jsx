@@ -1,6 +1,7 @@
 import { useState } from "react";
 import NotasResponsable from "./NotasResponsable";
 import ComentariosConsultor from "./ComentariosConsultor";
+import EnlaceEvidencias from "./EnlaceEvidencias";
 
 function getEstado(paso, checklist) {
   const ids = paso.actividades.filter((a) => !a.tipo || a.tipo === "check").map((a) => a.id);
@@ -205,6 +206,14 @@ export default function PasoCard({
                     );
                   })}
                 </ul>
+                <div className="mt-4 bg-white border border-gray-200 rounded-lg p-4">
+                  <EnlaceEvidencias
+                    pasoId={`${paso.id}-${seccion}`}
+                    notas={notas}
+                    setNotas={setNotas}
+                    rol={rol}
+                  />
+                </div>
                 <ComentariosConsultor
                   pasoId={`${paso.id}-${seccion}`}
                   comentarios={comentarios}
