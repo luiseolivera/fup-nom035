@@ -195,7 +195,7 @@ export default function PasoCard({
                           {checklist[act.id] && <i className="ti ti-check text-white text-xs"></i>}
                         </button>
                         <div className="flex-1 min-w-0">
-                          <p className={`text-sm ${checklist[act.id] ? "line-through text-gray-400" : "text-gray-700"}`}>
+                          <p className={`text-sm ${checklist[act.id] ? "text-gray-400" : "text-gray-700"}`}>
                             {act.texto}
                           </p>
                           {act.nota && (
@@ -238,7 +238,7 @@ export default function PasoCard({
                       {checklist[act.id] && <i className="ti ti-check text-white text-xs"></i>}
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${checklist[act.id] ? "line-through text-gray-400" : "text-gray-700"}`}>
+                      <p className={`text-sm ${checklist[act.id] ? "text-gray-400" : "text-gray-700"}`}>
                         {act.texto}
                       </p>
                       {act.link && (
