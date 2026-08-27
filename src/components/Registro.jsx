@@ -35,7 +35,12 @@ export default function Registro({ empresa: empresaProp }) {
         options: { shouldCreateUser: true },
       });
       if (error) {
-        setError("Error al enviar el código: " + (error.message || error.error_description || "Error desconocido, intenta de nuevo."));
+        // Para errores 5xx, supabase-js reemplaza el mensaje real por "{}"
+        // (AuthRetryableFetchError) en vez del detalle del servidor.
+        const mensaje = error.message && error.message !== "{}"
+          ? error.message
+          : "No se pudo enviar el correo. Intenta de nuevo en unos minutos; si el problema persiste, contacta a soporte.";
+        setError("Error al enviar el código: " + mensaje);
       } else {
         setStep("otp");
       }
