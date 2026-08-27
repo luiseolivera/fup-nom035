@@ -8,7 +8,7 @@ const ROLES = [
   { id: "consultor", label: "Consultor", icon: "ti-briefcase" },
 ];
 
-export default function Header({ rol, setRol, empresa, onHelp }) {
+export default function Header({ rol, setRol, empresa, onHelp, demo = false }) {
   const [copied, setCopied] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -38,23 +38,25 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
           <div className="flex items-center gap-3 min-w-0">
             <div className="min-w-0">
               <p className="text-white font-bold text-sm leading-tight" style={{ maxWidth: "260px", whiteSpace: "normal", lineHeight: "1.2" }}>
-                Herramienta de seguimiento para el cumplimiento de la NOM-035-STPS-2018
+                Herramienta de apoyo y seguimiento para el cumplimiento de la NOM-035-STPS-2018
               </p>
             </div>
           </div>
 
           {/* Right: copy link + help + role toggle */}
           <div className="flex items-center gap-2 flex-wrap justify-end">
-            <button
-              onClick={copyLink}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
-              title="Copiar enlace compartido"
-            >
-              <i className={`ti ${copied ? "ti-check" : "ti-copy"} text-sm`}></i>
-              <span className="hidden sm:inline">
-                {copied ? "¡Enlace copiado!" : "Copiar enlace"}
-              </span>
-            </button>
+            {!demo && (
+              <button
+                onClick={copyLink}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
+                title="Copiar enlace compartido"
+              >
+                <i className={`ti ${copied ? "ti-check" : "ti-copy"} text-sm`}></i>
+                <span className="hidden sm:inline">
+                  {copied ? "¡Enlace copiado!" : "Copiar enlace"}
+                </span>
+              </button>
+            )}
 
             <button
               onClick={onHelp}
@@ -64,14 +66,26 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
               ?
             </button>
 
-            <button
-              onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
-              title="Cerrar sesión"
-            >
-              <i className="ti ti-logout text-sm"></i>
-              <span className="hidden sm:inline">Salir</span>
-            </button>
+            {demo ? (
+              <button
+                onClick={() => { window.location.href = "/"; }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-semibold transition"
+                style={{ background: "#E9C46A", color: "#1D3557" }}
+                title="Registrarme"
+              >
+                <i className="ti ti-user-plus text-sm"></i>
+                <span className="hidden sm:inline">Registrarme</span>
+              </button>
+            ) : (
+              <button
+                onClick={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/30 text-white/90 hover:bg-white/10 transition"
+                title="Cerrar sesión"
+              >
+                <i className="ti ti-logout text-sm"></i>
+                <span className="hidden sm:inline">Salir</span>
+              </button>
+            )}
 
             {/* Role toggle */}
             <div className="flex rounded-lg overflow-hidden border border-white/30">
@@ -97,6 +111,13 @@ export default function Header({ rol, setRol, empresa, onHelp }) {
         {copied && (
           <div className="text-center text-xs py-1.5" style={{ background: "#E9C46A", color: "#1D3557" }}>
             Enlace copiado. Compártelo con el director y el consultor de esta empresa.
+          </div>
+        )}
+
+        {demo && (
+          <div className="text-center text-xs py-1.5 px-4" style={{ background: "#E9C46A", color: "#1D3557" }}>
+            Estás en <strong>modo de prueba</strong>: solo puedes explorar el primer apartado y nada se guarda.{" "}
+            <a href="/" className="underline font-semibold">Regístrate</a> para acceder a la herramienta completa y guardar tu progreso.
           </div>
         )}
       </header>

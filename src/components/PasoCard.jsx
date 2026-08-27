@@ -100,11 +100,17 @@ export default function PasoCard({
   comentarios,
   setComentarios,
   rol,
+  locked = false,
 }) {
   const [open, setOpen] = useState(false);
   const estado = getEstado(paso, checklist);
   const s = ESTADO_STYLES[estado];
   const canCheck = rol === "responsable" || rol === "consultor";
+
+  function handleHeaderClick() {
+    if (locked) return;
+    setOpen((v) => !v);
+  }
 
   const checkActividades = paso.actividades.filter((a) => !a.tipo || a.tipo === "check");
   const completadas = checkActividades.filter((a) => checklist[a.id]).length;
@@ -132,10 +138,11 @@ export default function PasoCard({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${locked ? "opacity-60" : ""}`}>
       <button
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 transition"
-        onClick={() => setOpen((v) => !v)}
+        className={`w-full flex items-center gap-3 px-5 py-4 text-left transition ${locked ? "cursor-not-allowed" : "hover:bg-gray-50"}`}
+        onClick={handleHeaderClick}
+        title={locked ? "Regístrate para ver este apartado" : undefined}
       >
         <div
           className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm text-white"
@@ -146,17 +153,19 @@ export default function PasoCard({
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-gray-800 text-sm">{paso.titulo}</p>
           <p className="text-xs text-gray-400 mt-0.5">
-            {completadas} de {total} actividades
+            {locked ? "Regístrate para ver este apartado" : `${completadas} de ${total} actividades`}
           </p>
         </div>
-        <span
-          className="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1.5"
-          style={{ background: s.bg, color: s.text }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: s.dot }} />
-          {s.label}
-        </span>
-        <i className={`ti ${open ? "ti-chevron-up" : "ti-chevron-down"} text-gray-400 flex-shrink-0`}></i>
+        {!locked && (
+          <span
+            className="text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 flex items-center gap-1.5"
+            style={{ background: s.bg, color: s.text }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ background: s.dot }} />
+            {s.label}
+          </span>
+        )}
+        <i className={`ti ${locked ? "ti-lock" : open ? "ti-chevron-up" : "ti-chevron-down"} text-gray-400 flex-shrink-0`}></i>
       </button>
 
       <div className="w-full bg-gray-100 h-1">

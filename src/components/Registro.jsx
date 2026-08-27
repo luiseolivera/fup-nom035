@@ -95,6 +95,9 @@ export default function Registro({ empresa: empresaProp }) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-10">
+      <p className="w-full max-w-md text-center text-sm font-medium text-gray-500 mb-4">
+        Herramienta de apoyo y seguimiento para el cumplimiento de la NOM-035-STPS-2018
+      </p>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3" style={{ background: "#1D3557" }}>
@@ -154,6 +157,12 @@ export default function Registro({ empresa: empresaProp }) {
               {loading ? "Enviando código..." : "Verificar correo electrónico"}
             </button>
             <p className="text-xs text-gray-400 text-center">Te enviaremos un código para confirmar tu correo.</p>
+
+            <div className="pt-2 border-t border-gray-100 text-center">
+              <a href="?demo=1" className="text-xs font-medium hover:underline" style={{ color: "#1D3557" }}>
+                Explorar la herramienta en modo de prueba, sin registrarme →
+              </a>
+            </div>
           </form>
         ) : (
           <form onSubmit={handleVerifyOtp} className="space-y-4">

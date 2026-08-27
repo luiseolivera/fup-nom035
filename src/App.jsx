@@ -20,10 +20,22 @@ function Spinner({ texto }) {
   );
 }
 
+function useIsDemo() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("demo") === "1";
+}
+
 export default function App() {
   const empresa = useEmpresa();
+  const isDemo = useIsDemo();
   const [rol, setRol] = useState("responsable");
   const [modalAyuda, setModalAyuda] = useState(false);
+
+  // Estado local del modo de prueba: nunca se guarda en Supabase.
+  const [demoDatos, setDemoDatos] = useState({});
+  const [demoChecklist, setDemoChecklist] = useState({});
+  const [demoNotas, setDemoNotas] = useState({});
+  const [demoComentarios, setDemoComentarios] = useState({});
 
   const {
     loading: dataLoading,
@@ -31,11 +43,20 @@ export default function App() {
     checklist, setChecklist,
     notas, setNotas,
     comentarios, setComentarios,
-  } = useSupabaseData(empresa || null);
+  } = useSupabaseData(!isDemo && empresa ? empresa : null);
 
-  // No empresa in URL → show registration with empresa field
-  if (!empresa) return <Registro />;
-  if (dataLoading) return <Spinner texto="Cargando datos..." />;
+  // No empresa en la URL y no es modo de prueba → mostrar registro
+  if (!isDemo && !empresa) return <Registro />;
+  if (!isDemo && dataLoading) return <Spinner texto="Cargando datos..." />;
+
+  const datosActivos = isDemo ? demoDatos : datos;
+  const setDatosActivos = isDemo ? setDemoDatos : setDatos;
+  const checklistActivo = isDemo ? demoChecklist : checklist;
+  const setChecklistActivo = isDemo ? setDemoChecklist : setChecklist;
+  const notasActivas = isDemo ? demoNotas : notas;
+  const setNotasActivas = isDemo ? setDemoNotas : setNotas;
+  const comentariosActivos = isDemo ? demoComentarios : comentarios;
+  const setComentariosActivos = isDemo ? setDemoComentarios : setComentarios;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#f8fafc" }}>
@@ -44,25 +65,27 @@ export default function App() {
         setRol={setRol}
         empresa={empresa}
         onHelp={() => setModalAyuda(true)}
+        demo={isDemo}
       />
 
-      <EmpresaBar datos={datos} setDatos={setDatos} rol={rol} />
+      <EmpresaBar datos={datosActivos} setDatos={setDatosActivos} rol={rol} />
 
       <main className="flex-1 pb-12">
-        <Dashboard checklist={checklist} datos={datos} />
+        <Dashboard checklist={checklistActivo} datos={datosActivos} />
 
         <div className="max-w-5xl mx-auto px-4 space-y-3">
           {PASOS.map((paso) => (
             <PasoCard
               key={paso.id}
               paso={paso}
-              checklist={checklist}
-              setChecklist={setChecklist}
-              notas={notas}
-              setNotas={setNotas}
-              comentarios={comentarios}
-              setComentarios={setComentarios}
+              checklist={checklistActivo}
+              setChecklist={setChecklistActivo}
+              notas={notasActivas}
+              setNotas={setNotasActivas}
+              comentarios={comentariosActivos}
+              setComentarios={setComentariosActivos}
               rol={rol}
+              locked={isDemo && paso.id !== 1}
             />
           ))}
         </div>
