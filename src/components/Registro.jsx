@@ -29,14 +29,18 @@ export default function Registro({ empresa: empresaProp }) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.correo)) return setError("El correo electrónico no es válido.");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: form.correo,
-      options: { shouldCreateUser: true },
-    });
-    if (error) {
-      setError("Error al enviar el código: " + error.message);
-    } else {
-      setStep("otp");
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: form.correo,
+        options: { shouldCreateUser: true },
+      });
+      if (error) {
+        setError("Error al enviar el código: " + (error.message || error.error_description || "Error desconocido, intenta de nuevo."));
+      } else {
+        setStep("otp");
+      }
+    } catch (err) {
+      setError("Error al enviar el código: " + (err?.message || "No se pudo conectar con el servidor."));
     }
     setLoading(false);
   }
