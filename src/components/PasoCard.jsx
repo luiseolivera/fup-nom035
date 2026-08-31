@@ -12,6 +12,16 @@ function getEstado(paso, checklist) {
   return "en-proceso";
 }
 
+// Algunas actividades (los "1., 2., 3..." del punto 4) tienen justo debajo
+// un campo "Desarrollar:" (tipo "nota", id = `${actId}d`) donde el
+// responsable anota la evidencia. Esas solo se pueden marcar como
+// cumplidas si ya se escribió algo ahí.
+function notaRequeridaId(paso, actId) {
+  const posibleId = `${actId}d`;
+  const existe = paso.actividades.some((a) => a.id === posibleId && a.tipo === "nota");
+  return existe ? posibleId : null;
+}
+
 const ESTADO_STYLES = {
   pendiente: { bg: "#fef2f2", text: "#ef4444", label: "Pendiente", dot: "#ef4444" },
   "en-proceso": { bg: "#fff7ed", text: "#f97316", label: "En proceso", dot: "#f97316" },
@@ -118,6 +128,13 @@ export default function PasoCard({
 
   function toggleActividad(id) {
     if (!canCheck) return;
+    if (!checklist[id]) {
+      const notaId = notaRequeridaId(paso, id);
+      if (notaId && !(notas[notaId] && notas[notaId].trim())) {
+        // No se puede marcar como cumplida sin antes anotar la evidencia.
+        return;
+      }
+    }
     setChecklist((prev) => ({ ...prev, [id]: !prev[id] }));
   }
 
@@ -192,14 +209,18 @@ export default function PasoCard({
                     if (act.tipo === "radio4") {
                       return <ActividadRadio4 key={act.id} act={act} notas={notas} setNotas={setNotas} rol={rol} />;
                     }
+                    const notaId = notaRequeridaId(paso, act.id);
+                    const notaLlena = !notaId || !!(notas[notaId] && notas[notaId].trim());
+                    const bloqueado = !checklist[act.id] && !notaLlena;
                     return (
                       <li key={act.id} className="flex items-start gap-3">
                         <button
                           onClick={() => toggleActividad(act.id)}
                           className={`mt-0.5 w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition ${
                             checklist[act.id] ? "border-green-500 bg-green-500" : "border-gray-300 bg-white"
-                          } ${canCheck ? "cursor-pointer hover:border-green-400" : "cursor-default"}`}
-                          disabled={!canCheck}
+                          } ${canCheck && !bloqueado ? "cursor-pointer hover:border-green-400" : "cursor-not-allowed"}`}
+                          disabled={!canCheck || bloqueado}
+                          title={bloqueado ? "Escribe una nota en \"Desarrollar\" para poder marcarlo como cumplido" : undefined}
                         >
                           {checklist[act.id] && <i className="ti ti-check text-white text-xs"></i>}
                         </button>
@@ -209,6 +230,12 @@ export default function PasoCard({
                           </p>
                           {act.nota && (
                             <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>({act.nota})</p>
+                          )}
+                          {bloqueado && (
+                            <p className="text-xs mt-1 flex items-center gap-1" style={{ color: "#b45309" }}>
+                              <i className="ti ti-lock text-xs"></i>
+                              Escribe una nota en "Desarrollar" para poder marcarlo como cumplido
+                            </p>
                           )}
                         </div>
                       </li>
