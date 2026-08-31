@@ -37,8 +37,12 @@ serve(async (req) => {
   const client = new SMTPClient({
     connection: {
       hostname: SES_SMTP_HOST,
-      port: 587,
-      tls: false, // SES usa STARTTLS en el puerto 587, no TLS implícito
+      // Puerto 465 con TLS directo. El puerto 587 (STARTTLS) falla en el
+      // runtime de Supabase Edge Functions con "BadResource: Bad resource ID
+      // at Object.startTls" — bug conocido de compatibilidad, no de las
+      // credenciales. 465 evita ese código y funciona sin problema.
+      port: 465,
+      tls: true,
       auth: {
         username: SES_SMTP_USER,
         password: SES_SMTP_PASS,
