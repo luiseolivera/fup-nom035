@@ -82,6 +82,7 @@ export default function App() {
               setChecklist={setChecklistActivo}
               notas={notasActivas}
               setNotas={setNotasActivas}
+              datos={datosActivos}
               comentarios={comentariosActivos}
               setComentarios={setComentariosActivos}
               rol={rol}

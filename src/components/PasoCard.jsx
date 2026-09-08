@@ -22,6 +22,48 @@ function notaRequeridaId(paso, actId) {
   return existe ? posibleId : null;
 }
 
+function BotonDescargarPortada({ datos }) {
+  const [estado, setEstado] = useState("idle"); // idle | generando | error
+  const faltaNombre = !datos?.nombre?.trim();
+
+  async function handleClick() {
+    setEstado("generando");
+    try {
+      // Carga diferida: pdf-lib solo se descarga si de verdad se usa este botón.
+      const { descargarPortadaPdf } = await import("../utils/generarPortada");
+      await descargarPortadaPdf(datos);
+      setEstado("idle");
+    } catch (err) {
+      console.error("Error generando la portada del reporte:", err);
+      setEstado("error");
+    }
+  }
+
+  return (
+    <div className="mt-1">
+      <button
+        onClick={handleClick}
+        disabled={estado === "generando"}
+        className="inline-flex items-center gap-1 text-xs mt-1 font-medium hover:underline disabled:opacity-60"
+        style={{ color: "#1D3557" }}
+      >
+        <i className={`ti ${estado === "generando" ? "ti-loader-2" : "ti-file-download"} text-sm`}></i>
+        {estado === "generando" ? "Generando reporte..." : "Descargar portada del reporte (rellenada)"}
+      </button>
+      {faltaNombre && (
+        <p className="text-xs text-gray-400 mt-0.5">
+          Captura el nombre del centro de trabajo arriba para incluirlo en el reporte.
+        </p>
+      )}
+      {estado === "error" && (
+        <p className="text-xs mt-0.5" style={{ color: "#dc2626" }}>
+          No se pudo generar el reporte. Intenta de nuevo.
+        </p>
+      )}
+    </div>
+  );
+}
+
 const ESTADO_STYLES = {
   pendiente: { bg: "#fef2f2", text: "#ef4444", label: "Pendiente", dot: "#ef4444" },
   "en-proceso": { bg: "#fff7ed", text: "#f97316", label: "En proceso", dot: "#f97316" },
@@ -109,6 +151,7 @@ export default function PasoCard({
   setNotas,
   comentarios,
   setComentarios,
+  datos,
   rol,
   locked = false,
 }) {
@@ -285,6 +328,7 @@ export default function PasoCard({
                           {act.linkLabel || "Abrir formato/recurso"}
                         </a>
                       )}
+                      {act.generarPortada && <BotonDescargarPortada datos={datos} />}
                       {act.nota && (
                         <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>({act.nota})</p>
                       )}

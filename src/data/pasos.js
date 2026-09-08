@@ -18,8 +18,7 @@ export const PASOS = [
       {
         id: "1-3",
         texto: "Generar el reporte de encuestas con los elementos requeridos por NOM-035 y las recomendaciones del consultor.",
-        link: "https://ui-nom035.s3.us-east-2.amazonaws.com/portada-enc.pdf",
-        linkLabel: "Abrir portada-enc.pdf",
+        generarPortada: true,
       },
       {
         id: "1-4",
