@@ -2,6 +2,7 @@ import { useState } from "react";
 import NotasResponsable from "./NotasResponsable";
 import ComentariosConsultor from "./ComentariosConsultor";
 import EnlaceEvidencias from "./EnlaceEvidencias";
+import CargarResultados from "./CargarResultados";
 
 function getEstado(paso, checklist) {
   const ids = paso.actividades.filter((a) => !a.tipo || a.tipo === "check").map((a) => a.id);
@@ -331,6 +332,9 @@ export default function PasoCard({
                       {act.generarPortada && <BotonDescargarPortada datos={datos} />}
                       {act.nota && (
                         <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>({act.nota})</p>
+                      )}
+                      {act.cargarResultados && (
+                        <CargarResultados tipo={act.cargarResultados} datos={datos} rol={rol} />
                       )}
                     </div>
                   </li>

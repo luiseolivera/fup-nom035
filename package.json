@@ -12,8 +12,10 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.108.2",
     "pdf-lib": "^1.17.1",
+    "pizzip": "^3.2.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

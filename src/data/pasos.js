@@ -36,6 +36,7 @@ export const PASOS = [
         texto: "Verificar validez de respuestas ATS mediante el formato de verificación",
         link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato+para+verificar+informaci%C3%B3n+ATS.pdf",
         linkLabel: "Abrir formato de verificación ATS",
+        cargarResultados: "ats",
       },
       {
         id: "2-2",
@@ -48,6 +49,7 @@ export const PASOS = [
         texto: "Validar respuestas RPS: confirmar casos de riesgo alto con síntomas",
         link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato_Entrevista_Riesgos_Psicosociales.docx",
         linkLabel: "Descargar formato de entrevista RPS",
+        cargarResultados: "rps",
       },
     ],
   },
