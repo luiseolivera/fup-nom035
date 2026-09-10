@@ -3,6 +3,7 @@ import NotasResponsable from "./NotasResponsable";
 import ComentariosConsultor from "./ComentariosConsultor";
 import EnlaceEvidencias from "./EnlaceEvidencias";
 import CargarResultados from "./CargarResultados";
+import { importarConReintento } from "../utils/cargaDiferida";
 
 function getEstado(paso, checklist) {
   const ids = paso.actividades.filter((a) => !a.tipo || a.tipo === "check").map((a) => a.id);
@@ -31,7 +32,7 @@ function BotonDescargarPortada({ datos }) {
     setEstado("generando");
     try {
       // Carga diferida: pdf-lib solo se descarga si de verdad se usa este botón.
-      const { descargarPortadaPdf } = await import("../utils/generarPortada");
+      const { descargarPortadaPdf } = await importarConReintento(() => import("../utils/generarPortada"));
       await descargarPortadaPdf(datos);
       setEstado("idle");
     } catch (err) {
