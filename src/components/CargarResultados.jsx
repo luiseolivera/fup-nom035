@@ -7,6 +7,7 @@ const CONFIG = {
     procesar: (archivo, datos) => import("../utils/generarFormatos").then((m) => m.procesarResultadosAts(archivo, datos)),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores requieren atención clínica — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador requiere atención clínica según este archivo; no se generó ningún formato.",
+    plantilla: "/plantillas/plantilla-resultados-ats.xlsx",
   },
   rps: {
     etiqueta: "Cargar resultados de RPS (Excel)",
@@ -14,6 +15,7 @@ const CONFIG = {
     procesar: (archivo, datos) => import("../utils/generarFormatos").then((m) => m.procesarResultadosRps(archivo, datos)),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores tienen riesgo Alto o Muy alto — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador tiene riesgo Alto o Muy alto según este archivo; no se generó ningún formato.",
+    plantilla: "/plantillas/plantilla-resultados-rps.xlsx",
   },
 };
 
@@ -62,6 +64,15 @@ export default function CargarResultados({ tipo, datos, rol }) {
         </span>
       </div>
       <p className="text-xs text-gray-400 mb-2">{config.ayuda}</p>
+      <a
+        href={config.plantilla}
+        download
+        className="inline-flex items-center gap-1 text-xs font-medium hover:underline mb-3"
+        style={{ color: "#1D3557" }}
+      >
+        <i className="ti ti-download text-sm"></i>
+        Descargar plantilla de ejemplo (Excel)
+      </a>
 
       {editable ? (
         <>
