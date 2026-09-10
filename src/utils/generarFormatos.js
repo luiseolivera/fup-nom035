@@ -80,9 +80,14 @@ async function cargarPdf(url) {
 
 /**
  * Formato de Entrevista por Acontecimientos Traumáticos Severos (verificación ATS).
- * trabajador: { nombre, area, motivos, requiereAtencion }
+ * trabajador: { nombre, empresa, motivos, requiereAtencion }
+ * "empresa" es la empresa/subsidiaria real del trabajador (viene del Excel,
+ * no del nombre capturado en "Datos del centro de trabajo", porque una
+ * misma carga puede incluir trabajadores de varias empresas del grupo).
+ * El campo "Área:" del formato se deja en blanco (no hay ese dato) para
+ * llenarse a mano.
  */
-export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
+export async function generarFormatoAtsVerificacion(trabajador) {
   const pdfDoc = await cargarPdf(PLANTILLA_ATS_VERIFICACION);
   const page = pdfDoc.getPages()[0];
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -96,8 +101,7 @@ export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
 
   reemplazarLinea(90.03, 648.58, 300, `Fecha: ${formatearFecha(new Date())}`);
   reemplazarLinea(90.03, 633.95, 440, `Nombre del trabajador(a): ${trabajador.nombre}`);
-  reemplazarLinea(90.03, 619.35, 300, `Empresa: ${datosEmpresa?.nombre || ""}`);
-  reemplazarLinea(90.03, 604.95, 300, `Área: ${trabajador.area}`);
+  reemplazarLinea(90.03, 619.35, 300, `Empresa: ${trabajador.empresa}`);
 
   // Motivo del Acontecimiento Traumático Severo. El espacio disponible entre
   // la etiqueta (y≈478) y el siguiente bloque "Marcar con una X..." (y≈429)
@@ -144,9 +148,11 @@ export async function generarFormatoCanalizacion(trabajador) {
 
 /**
  * Formato de Entrevista de Riesgos Psicosociales (DOCX).
- * trabajador: { nombre, area }
+ * trabajador: { nombre, empresa }
+ * "empresa" es la empresa/subsidiaria real del trabajador (viene del Excel).
+ * El campo "Área:" se deja en blanco (sin ese dato) para llenarse a mano.
  */
-export async function generarFormatoEntrevistaRps(trabajador, datosEmpresa) {
+export async function generarFormatoEntrevistaRps(trabajador) {
   const bytes = await fetch(PLANTILLA_RPS_DOCX).then((res) => {
     if (!res.ok) throw new Error("No se pudo cargar la plantilla del formato RPS.");
     return res.arrayBuffer();
@@ -167,11 +173,7 @@ export async function generarFormatoEntrevistaRps(trabajador, datosEmpresa) {
   );
   xml = xml.replace(
     "Empresa: ______________________",
-    `Empresa: ${escaparXml(datosEmpresa?.nombre || "")}`
-  );
-  xml = xml.replace(
-    "Área: _________________________",
-    `Área: ${escaparXml(trabajador.area)}`
+    `Empresa: ${escaparXml(trabajador.empresa)}`
   );
   zip.file("word/document.xml", xml);
 
@@ -206,7 +208,7 @@ function descargarBytes(bytes, nombreArchivo, tipoMime) {
  * para quienes requieren atención clínica, también la carta de canalización.
  * Descarga todo en un solo ZIP. Devuelve un resumen del procesamiento.
  */
-export async function procesarResultadosAts(archivoExcel, datosEmpresa) {
+export async function procesarResultadosAts(archivoExcel) {
   const XLSX = await import("xlsx");
   const bufer = await archivoExcel.arrayBuffer();
   const libro = XLSX.read(bufer, { type: "array" });
@@ -220,7 +222,9 @@ export async function procesarResultadosAts(archivoExcel, datosEmpresa) {
   const trabajadores = filas
     .map((fila) => ({
       nombre: buscarColumna(fila, ["NOMBRE", "TRABAJADOR", "NOMBRE DEL TRABAJADOR"]),
-      area: buscarColumna(fila, ["AREA", "ÁREA", "DEPARTAMENTO"]),
+      // La columna "ÁREA" del Excel en realidad identifica la empresa/
+      // subsidiaria real del trabajador dentro del grupo, no un departamento.
+      empresa: buscarColumna(fila, ["AREA", "ÁREA", "EMPRESA", "SUBSIDIARIA", "RAZON SOCIAL", "RAZÓN SOCIAL"]),
       motivos: buscarColumna(fila, ["MOTIVOS", "MOTIVO"]),
       requiereAtencion: normalizar(
         buscarColumna(fila, [
@@ -240,7 +244,7 @@ export async function procesarResultadosAts(archivoExcel, datosEmpresa) {
 
   const archivos = [];
   for (const trabajador of aCanalizar) {
-    const verificacion = await generarFormatoAtsVerificacion(trabajador, datosEmpresa);
+    const verificacion = await generarFormatoAtsVerificacion(trabajador);
     archivos.push({ nombre: nombreArchivo("verificacion-ats", trabajador.nombre, "pdf"), bytes: verificacion });
     const canalizacion = await generarFormatoCanalizacion(trabajador);
     archivos.push({ nombre: nombreArchivo("canalizacion", trabajador.nombre, "pdf"), bytes: canalizacion });
@@ -256,7 +260,7 @@ export async function procesarResultadosAts(archivoExcel, datosEmpresa) {
  * Procesa el Excel de resultados de RPS: genera el formato de entrevista para
  * quienes tienen nivel de riesgo Alto o Muy alto. Descarga todo en un ZIP.
  */
-export async function procesarResultadosRps(archivoExcel, datosEmpresa) {
+export async function procesarResultadosRps(archivoExcel) {
   const XLSX = await import("xlsx");
   const bufer = await archivoExcel.arrayBuffer();
   const libro = XLSX.read(bufer, { type: "array" });
@@ -270,7 +274,8 @@ export async function procesarResultadosRps(archivoExcel, datosEmpresa) {
   const trabajadores = filas
     .map((fila) => ({
       nombre: buscarColumna(fila, ["NOMBRE", "TRABAJADOR", "NOMBRE DEL TRABAJADOR"]),
-      area: buscarColumna(fila, ["AREA", "ÁREA", "DEPARTAMENTO"]),
+      // Igual que en ATS: "ÁREA" identifica la empresa/subsidiaria real.
+      empresa: buscarColumna(fila, ["AREA", "ÁREA", "EMPRESA", "SUBSIDIARIA", "RAZON SOCIAL", "RAZÓN SOCIAL"]),
       nivel: normalizar(buscarColumna(fila, ["NIVEL DE RIESGO", "NIVEL", "RIESGO"])),
     }))
     .filter((t) => t.nombre);
@@ -283,7 +288,7 @@ export async function procesarResultadosRps(archivoExcel, datosEmpresa) {
 
   const archivos = [];
   for (const trabajador of conRiesgo) {
-    const docx = await generarFormatoEntrevistaRps(trabajador, datosEmpresa);
+    const docx = await generarFormatoEntrevistaRps(trabajador);
     archivos.push({ nombre: nombreArchivo("entrevista-rps", trabajador.nombre, "docx"), bytes: docx });
   }
 

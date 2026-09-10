@@ -334,7 +334,7 @@ export default function PasoCard({
                         <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>({act.nota})</p>
                       )}
                       {act.cargarResultados && (
-                        <CargarResultados tipo={act.cargarResultados} datos={datos} rol={rol} />
+                        <CargarResultados tipo={act.cargarResultados} rol={rol} />
                       )}
                     </div>
                   </li>

@@ -3,23 +3,23 @@ import { useState, useRef } from "react";
 const CONFIG = {
   ats: {
     etiqueta: "Cargar resultados de ATS (Excel)",
-    ayuda: "Se genera el formato de verificación y la carta de canalización solo para quienes requieren atención clínica.",
-    procesar: (archivo, datos) => import("../utils/generarFormatos").then((m) => m.procesarResultadosAts(archivo, datos)),
+    ayuda: "Se genera el formato de verificación y la carta de canalización solo para quienes requieren atención clínica. La columna \"ÁREA\" del Excel debe traer la empresa/subsidiaria real del trabajador (se usa como \"Empresa:\" en el formato); el campo \"Área:\" queda en blanco.",
+    procesar: (archivo) => import("../utils/generarFormatos").then((m) => m.procesarResultadosAts(archivo)),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores requieren atención clínica — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador requiere atención clínica según este archivo; no se generó ningún formato.",
     plantilla: "/plantillas/plantilla-resultados-ats.xlsx",
   },
   rps: {
     etiqueta: "Cargar resultados de RPS (Excel)",
-    ayuda: "Se genera el formato de entrevista solo para quienes tienen nivel de riesgo Alto o Muy alto.",
-    procesar: (archivo, datos) => import("../utils/generarFormatos").then((m) => m.procesarResultadosRps(archivo, datos)),
+    ayuda: "Se genera el formato de entrevista solo para quienes tienen nivel de riesgo Alto o Muy alto. La columna \"ÁREA\" del Excel debe traer la empresa/subsidiaria real del trabajador (se usa como \"Empresa:\" en el formato); el campo \"Área:\" queda en blanco.",
+    procesar: (archivo) => import("../utils/generarFormatos").then((m) => m.procesarResultadosRps(archivo)),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores tienen riesgo Alto o Muy alto — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador tiene riesgo Alto o Muy alto según este archivo; no se generó ningún formato.",
     plantilla: "/plantillas/plantilla-resultados-rps.xlsx",
   },
 };
 
-export default function CargarResultados({ tipo, datos, rol }) {
+export default function CargarResultados({ tipo, rol }) {
   const config = CONFIG[tipo];
   const inputRef = useRef(null);
   const [estado, setEstado] = useState("idle"); // idle | procesando | listo | error | vacio
@@ -34,7 +34,7 @@ export default function CargarResultados({ tipo, datos, rol }) {
     setEstado("procesando");
     setMensaje("");
     try {
-      const resumen = await config.procesar(archivo, datos);
+      const resumen = await config.procesar(archivo);
       if (resumen.generados === 0) {
         setEstado("vacio");
         setMensaje(config.sinResultados);
