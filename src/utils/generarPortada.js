@@ -81,7 +81,7 @@ export async function generarPortadaPdf(datos = {}) {
       x: 135.98,
       y: 168,
       size: 12,
-      font,
+      font: fontBold,
       color: rgb(0.1, 0.1, 0.1),
     });
   }

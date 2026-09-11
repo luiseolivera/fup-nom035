@@ -38,6 +38,35 @@ function buscarColumna(fila, candidatos) {
   return "";
 }
 
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Reemplaza, dentro del XML de un docx, un "run" de Word que contiene
+ * exactamente `textoOriginal` (etiqueta + espacio en blanco) por dos runs:
+ * la etiqueta en el formato original y el valor en negritas. Así se
+ * mantiene la fuente/tamaño de la plantilla y solo se agrega <w:b/> al
+ * segundo run.
+ */
+function reemplazarConValorEnNegritasDocx(xml, textoOriginal, etiqueta, valorEscapado) {
+  // El grupo de <w:rPr> no debe poder "saltar" a otro run/párrafo: se
+  // restringe a que no contenga otro </w:rPr>, <w:r> o <w:t> de por medio,
+  // si no, con una plantilla que tiene varios renglones "etiqueta: ___"
+  // seguidos, el emparejamiento perezoso puede terminar abarcando el run
+  // equivocado (ya pasó: mezclaba el nombre dentro de la línea "Empresa:").
+  const patron = new RegExp(
+    `<w:r[^>]*>(<w:rPr>(?:(?!</w:rPr>|<w:r[ >]|<w:t)[\\s\\S])*?</w:rPr>)?<w:t>${escapeRegex(textoOriginal)}</w:t></w:r>`
+  );
+  return xml.replace(patron, (_coincidencia, rPr = "") => {
+    const rPrNegrita = rPr ? rPr.replace("</w:rPr>", "<w:b/></w:rPr>") : "<w:rPr><w:b/></w:rPr>";
+    return (
+      `<w:r>${rPr}<w:t xml:space="preserve">${etiqueta}</w:t></w:r>` +
+      `<w:r>${rPrNegrita}<w:t xml:space="preserve">${valorEscapado}</w:t></w:r>`
+    );
+  });
+}
+
 function limpiarMotivos(motivos) {
   return limpiar(motivos)
     .split("\n")
@@ -129,6 +158,7 @@ export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
   const pdfDoc = await cargarPdf(PLANTILLA_ATS_VERIFICACION);
   const page = pdfDoc.getPages()[0];
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const size = 11;
 
   dibujarLogo(page, await incrustarLogo(pdfDoc, datosEmpresa?.logo));
@@ -138,9 +168,17 @@ export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
     page.drawText(texto, { x, y, size, font, color: rgb(0, 0, 0) });
   }
 
+  // Etiqueta en letra normal, el nombre/empresa que se agrega en negritas.
+  function reemplazarLineaConValorEnNegritas(x, y, ancho, etiqueta, valor) {
+    page.drawRectangle({ x: x - 2, y: y - 3, width: ancho, height: 15, color: rgb(1, 1, 1) });
+    page.drawText(etiqueta, { x, y, size, font, color: rgb(0, 0, 0) });
+    const anchoEtiqueta = font.widthOfTextAtSize(etiqueta, size);
+    page.drawText(valor, { x: x + anchoEtiqueta, y, size, font: fontBold, color: rgb(0, 0, 0) });
+  }
+
   reemplazarLinea(90.03, 648.58, 300, `Fecha: ${formatearFecha(new Date())}`);
-  reemplazarLinea(90.03, 633.95, 440, `Nombre del trabajador(a): ${trabajador.nombre}`);
-  reemplazarLinea(90.03, 619.35, 300, `Empresa: ${datosEmpresa?.nombre || ""}`);
+  reemplazarLineaConValorEnNegritas(90.03, 633.95, 440, "Nombre del trabajador(a): ", trabajador.nombre);
+  reemplazarLineaConValorEnNegritas(90.03, 619.35, 300, "Empresa: ", datosEmpresa?.nombre || "");
 
   // Motivo del Acontecimiento Traumático Severo. El espacio disponible entre
   // la etiqueta (y≈478) y el siguiente bloque "Marcar con una X..." (y≈429)
@@ -165,20 +203,20 @@ export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
 export async function generarFormatoCanalizacion(trabajador, datosEmpresa) {
   const pdfDoc = await cargarPdf(PLANTILLA_CANALIZACION);
   const page = pdfDoc.getPages()[0];
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   dibujarLogo(page, await incrustarLogo(pdfDoc, datosEmpresa?.logo));
 
   // La coma que sigue al espacio en blanco original cae dentro de la zona
   // que se cubre con el rectángulo blanco, así que se redibuja como parte
-  // del mismo texto en vez de dejarla huérfana.
+  // del mismo texto en vez de dejarla huérfana. El nombre va en negritas.
   const texto = `${trabajador.nombre},`;
   const maxWidth = 145;
   let size = 10;
-  while (font.widthOfTextAtSize(texto, size) > maxWidth && size > 6) size -= 0.5;
+  while (fontBold.widthOfTextAtSize(texto, size) > maxWidth && size > 6) size -= 0.5;
 
   page.drawRectangle({ x: 376, y: 474, width: 150, height: 14, color: rgb(1, 1, 1) });
-  page.drawText(texto, { x: 380, y: 477.53, size, font, color: rgb(0, 0, 0) });
+  page.drawText(texto, { x: 380, y: 477.53, size, font: fontBold, color: rgb(0, 0, 0) });
 
   return pdfDoc.save();
 }
@@ -204,13 +242,17 @@ export async function generarFormatoEntrevistaRps(trabajador, datosEmpresa) {
     "Fecha: ________________________",
     `Fecha: ${escaparXml(formatearFecha(new Date()))}`
   );
-  xml = xml.replace(
+  xml = reemplazarConValorEnNegritasDocx(
+    xml,
     "Nombre del trabajador(a): ____________________________",
-    `Nombre del trabajador(a): ${escaparXml(trabajador.nombre)}`
+    "Nombre del trabajador(a): ",
+    escaparXml(trabajador.nombre)
   );
-  xml = xml.replace(
+  xml = reemplazarConValorEnNegritasDocx(
+    xml,
     "Empresa: ______________________",
-    `Empresa: ${escaparXml(datosEmpresa?.nombre || "")}`
+    "Empresa: ",
+    escaparXml(datosEmpresa?.nombre || "")
   );
   zip.file("word/document.xml", xml);
 
