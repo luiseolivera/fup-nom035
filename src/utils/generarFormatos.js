@@ -78,21 +78,60 @@ async function cargarPdf(url) {
   return PDFDocument.load(bytes);
 }
 
+function dataUrlABytes(dataUrl) {
+  const coma = dataUrl.indexOf(",");
+  const base64 = dataUrl.slice(coma + 1);
+  const binario = atob(base64);
+  const bytes = new Uint8Array(binario.length);
+  for (let i = 0; i < binario.length; i++) bytes[i] = binario.charCodeAt(i);
+  return bytes;
+}
+
+/** Incrusta el logo (data URL PNG/JPEG) en el PDF; null si no hay logo o falla. */
+async function incrustarLogo(pdfDoc, dataUrlLogo) {
+  if (!dataUrlLogo) return null;
+  try {
+    const bytes = dataUrlABytes(dataUrlLogo);
+    return dataUrlLogo.startsWith("data:image/png")
+      ? await pdfDoc.embedPng(bytes)
+      : await pdfDoc.embedJpg(bytes);
+  } catch (err) {
+    console.error("No se pudo incrustar el logo en el PDF:", err);
+    return null;
+  }
+}
+
+/**
+ * Cubre el placeholder "LOGO DE LA EMPRESA" (esquina superior izquierda) y
+ * dibuja ahí el logo real, si hay uno. Si no hay logo, simplemente deja el
+ * texto de la plantilla tal cual (no se toca nada).
+ */
+function dibujarLogo(page, logoImage) {
+  if (!logoImage) return;
+  page.drawRectangle({ x: 83, y: 726, width: 300, height: 38, color: rgb(1, 1, 1) });
+  const maxAncho = 160;
+  const maxAlto = 34;
+  const escala = Math.min(maxAncho / logoImage.width, maxAlto / logoImage.height, 1);
+  const width = logoImage.width * escala;
+  const height = logoImage.height * escala;
+  page.drawImage(logoImage, { x: 88, y: 760 - height, width, height });
+}
+
 /**
  * Formato de Entrevista por Acontecimientos Traumáticos Severos (verificación ATS).
- * trabajador: { nombre, empresa, motivos, requiereAtencion }
- * "empresa" es la empresa/subsidiaria real del trabajador (viene del Excel,
- * no del nombre capturado en "Datos del centro de trabajo", porque una
- * misma carga puede incluir trabajadores de varias empresas del grupo).
- * El campo "Área:" del formato se deja en blanco (no hay ese dato) para
- * llenarse a mano.
+ * trabajador: { nombre, motivos }
+ * "Empresa:" siempre es el nombre capturado en "Datos del centro de
+ * trabajo" (no se usa ningún dato del Excel para esto). "Área:" y la
+ * casilla "Requiere atención clínica" se dejan en blanco/sin marcar: eso
+ * lo decide el entrevistador a mano, no se infiere automáticamente.
  */
-export async function generarFormatoAtsVerificacion(trabajador) {
+export async function generarFormatoAtsVerificacion(trabajador, datosEmpresa) {
   const pdfDoc = await cargarPdf(PLANTILLA_ATS_VERIFICACION);
   const page = pdfDoc.getPages()[0];
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const size = 11;
+
+  dibujarLogo(page, await incrustarLogo(pdfDoc, datosEmpresa?.logo));
 
   function reemplazarLinea(x, y, ancho, texto) {
     page.drawRectangle({ x: x - 2, y: y - 3, width: ancho, height: 15, color: rgb(1, 1, 1) });
@@ -101,7 +140,7 @@ export async function generarFormatoAtsVerificacion(trabajador) {
 
   reemplazarLinea(90.03, 648.58, 300, `Fecha: ${formatearFecha(new Date())}`);
   reemplazarLinea(90.03, 633.95, 440, `Nombre del trabajador(a): ${trabajador.nombre}`);
-  reemplazarLinea(90.03, 619.35, 300, `Empresa: ${trabajador.empresa}`);
+  reemplazarLinea(90.03, 619.35, 300, `Empresa: ${datosEmpresa?.nombre || ""}`);
 
   // Motivo del Acontecimiento Traumático Severo. El espacio disponible entre
   // la etiqueta (y≈478) y el siguiente bloque "Marcar con una X..." (y≈429)
@@ -116,10 +155,6 @@ export async function generarFormatoAtsVerificacion(trabajador) {
     });
   }
 
-  // Marcar "Requiere atención clínica" / "No requiere atención clínica".
-  const y = trabajador.requiereAtencion ? 360.1 : 344.9;
-  page.drawText("X", { x: 312.2, y: y + 0.5, size: 10, font: fontBold, color: rgb(0, 0, 0) });
-
   return pdfDoc.save();
 }
 
@@ -127,10 +162,12 @@ export async function generarFormatoAtsVerificacion(trabajador) {
  * Carta de canalización del trabajador.
  * trabajador: { nombre }
  */
-export async function generarFormatoCanalizacion(trabajador) {
+export async function generarFormatoCanalizacion(trabajador, datosEmpresa) {
   const pdfDoc = await cargarPdf(PLANTILLA_CANALIZACION);
   const page = pdfDoc.getPages()[0];
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  dibujarLogo(page, await incrustarLogo(pdfDoc, datosEmpresa?.logo));
 
   // La coma que sigue al espacio en blanco original cae dentro de la zona
   // que se cubre con el rectángulo blanco, así que se redibuja como parte
@@ -148,11 +185,11 @@ export async function generarFormatoCanalizacion(trabajador) {
 
 /**
  * Formato de Entrevista de Riesgos Psicosociales (DOCX).
- * trabajador: { nombre, empresa }
- * "empresa" es la empresa/subsidiaria real del trabajador (viene del Excel).
- * El campo "Área:" se deja en blanco (sin ese dato) para llenarse a mano.
+ * trabajador: { nombre }
+ * "Empresa:" es el nombre capturado en "Datos del centro de trabajo".
+ * "Área:" se deja en blanco (sin ese dato) para llenarse a mano.
  */
-export async function generarFormatoEntrevistaRps(trabajador) {
+export async function generarFormatoEntrevistaRps(trabajador, datosEmpresa) {
   const bytes = await fetch(PLANTILLA_RPS_DOCX).then((res) => {
     if (!res.ok) throw new Error("No se pudo cargar la plantilla del formato RPS.");
     return res.arrayBuffer();
@@ -173,7 +210,7 @@ export async function generarFormatoEntrevistaRps(trabajador) {
   );
   xml = xml.replace(
     "Empresa: ______________________",
-    `Empresa: ${escaparXml(trabajador.empresa)}`
+    `Empresa: ${escaparXml(datosEmpresa?.nombre || "")}`
   );
   zip.file("word/document.xml", xml);
 
@@ -208,7 +245,7 @@ function descargarBytes(bytes, nombreArchivo, tipoMime) {
  * para quienes requieren atención clínica, también la carta de canalización.
  * Descarga todo en un solo ZIP. Devuelve un resumen del procesamiento.
  */
-export async function procesarResultadosAts(archivoExcel) {
+export async function procesarResultadosAts(archivoExcel, datosEmpresa) {
   const XLSX = await import("xlsx");
   const bufer = await archivoExcel.arrayBuffer();
   const libro = XLSX.read(bufer, { type: "array" });
@@ -222,9 +259,6 @@ export async function procesarResultadosAts(archivoExcel) {
   const trabajadores = filas
     .map((fila) => ({
       nombre: buscarColumna(fila, ["NOMBRE", "TRABAJADOR", "NOMBRE DEL TRABAJADOR"]),
-      // La columna "ÁREA" del Excel en realidad identifica la empresa/
-      // subsidiaria real del trabajador dentro del grupo, no un departamento.
-      empresa: buscarColumna(fila, ["AREA", "ÁREA", "EMPRESA", "SUBSIDIARIA", "RAZON SOCIAL", "RAZÓN SOCIAL"]),
       motivos: buscarColumna(fila, ["MOTIVOS", "MOTIVO"]),
       requiereAtencion: normalizar(
         buscarColumna(fila, [
@@ -244,9 +278,9 @@ export async function procesarResultadosAts(archivoExcel) {
 
   const archivos = [];
   for (const trabajador of aCanalizar) {
-    const verificacion = await generarFormatoAtsVerificacion(trabajador);
+    const verificacion = await generarFormatoAtsVerificacion(trabajador, datosEmpresa);
     archivos.push({ nombre: nombreArchivo("verificacion-ats", trabajador.nombre, "pdf"), bytes: verificacion });
-    const canalizacion = await generarFormatoCanalizacion(trabajador);
+    const canalizacion = await generarFormatoCanalizacion(trabajador, datosEmpresa);
     archivos.push({ nombre: nombreArchivo("canalizacion", trabajador.nombre, "pdf"), bytes: canalizacion });
   }
 
@@ -260,7 +294,7 @@ export async function procesarResultadosAts(archivoExcel) {
  * Procesa el Excel de resultados de RPS: genera el formato de entrevista para
  * quienes tienen nivel de riesgo Alto o Muy alto. Descarga todo en un ZIP.
  */
-export async function procesarResultadosRps(archivoExcel) {
+export async function procesarResultadosRps(archivoExcel, datosEmpresa) {
   const XLSX = await import("xlsx");
   const bufer = await archivoExcel.arrayBuffer();
   const libro = XLSX.read(bufer, { type: "array" });
@@ -274,8 +308,6 @@ export async function procesarResultadosRps(archivoExcel) {
   const trabajadores = filas
     .map((fila) => ({
       nombre: buscarColumna(fila, ["NOMBRE", "TRABAJADOR", "NOMBRE DEL TRABAJADOR"]),
-      // Igual que en ATS: "ÁREA" identifica la empresa/subsidiaria real.
-      empresa: buscarColumna(fila, ["AREA", "ÁREA", "EMPRESA", "SUBSIDIARIA", "RAZON SOCIAL", "RAZÓN SOCIAL"]),
       nivel: normalizar(buscarColumna(fila, ["NIVEL DE RIESGO", "NIVEL", "RIESGO"])),
     }))
     .filter((t) => t.nombre);
@@ -288,7 +320,7 @@ export async function procesarResultadosRps(archivoExcel) {
 
   const archivos = [];
   for (const trabajador of conRiesgo) {
-    const docx = await generarFormatoEntrevistaRps(trabajador);
+    const docx = await generarFormatoEntrevistaRps(trabajador, datosEmpresa);
     archivos.push({ nombre: nombreArchivo("entrevista-rps", trabajador.nombre, "docx"), bytes: docx });
   }
 

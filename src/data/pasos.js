@@ -32,17 +32,13 @@ export const PASOS = [
     titulo: "Validar las respuestas de las encuestas",
     actividades: [
       {
-        id: "2-1",
-        texto: "Verificar validez de respuestas ATS mediante el formato de verificación",
-        link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato+para+verificar+informaci%C3%B3n+ATS.pdf",
-        linkLabel: "Abrir formato de verificación ATS",
-        cargarResultados: "ats",
-      },
-      {
         id: "2-2",
         texto: "Canalizar los casos de ATS que lo requieran",
-        link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato+de+Canalizaci%C3%B3n.pdf",
-        linkLabel: "Abrir formato de canalización",
+        enlaces: [
+          { link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato+para+verificar+informaci%C3%B3n+ATS.pdf", linkLabel: "Abrir formato de verificación ATS" },
+          { link: "https://ui-nom035.s3.us-east-2.amazonaws.com/Formato+de+Canalizaci%C3%B3n.pdf", linkLabel: "Abrir formato de canalización" },
+        ],
+        cargarResultados: "ats",
       },
       {
         id: "2-3",

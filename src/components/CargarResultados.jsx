@@ -4,10 +4,10 @@ import { importarConReintento } from "../utils/cargaDiferida";
 const CONFIG = {
   ats: {
     etiqueta: "Cargar resultados de ATS (Excel)",
-    ayuda: "Se genera el formato de verificación y la carta de canalización solo para quienes requieren atención clínica. La columna \"ÁREA\" del Excel debe traer la empresa/subsidiaria real del trabajador (se usa como \"Empresa:\" en el formato); el campo \"Área:\" queda en blanco.",
-    procesar: (archivo) =>
+    ayuda: "Se genera el formato de verificación y la carta de canalización solo para quienes requieren atención clínica, con el nombre del trabajador, la fecha y el nombre de la empresa (el de \"Datos del centro de trabajo\"). La casilla \"Requiere atención clínica\" y el campo \"Área:\" quedan sin llenar para marcarse/anotarse a mano.",
+    procesar: (archivo, datos) =>
       importarConReintento(() => import("../utils/generarFormatos")).then((m) =>
-        m.procesarResultadosAts(archivo)
+        m.procesarResultadosAts(archivo, datos)
       ),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores requieren atención clínica — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador requiere atención clínica según este archivo; no se generó ningún formato.",
@@ -15,10 +15,10 @@ const CONFIG = {
   },
   rps: {
     etiqueta: "Cargar resultados de RPS (Excel)",
-    ayuda: "Se genera el formato de entrevista solo para quienes tienen nivel de riesgo Alto o Muy alto. La columna \"ÁREA\" del Excel debe traer la empresa/subsidiaria real del trabajador (se usa como \"Empresa:\" en el formato); el campo \"Área:\" queda en blanco.",
-    procesar: (archivo) =>
+    ayuda: "Se genera el formato de entrevista solo para quienes tienen nivel de riesgo Alto o Muy alto, con el nombre del trabajador, la fecha y el nombre de la empresa (el de \"Datos del centro de trabajo\"). El campo \"Área:\" queda en blanco para llenarse a mano.",
+    procesar: (archivo, datos) =>
       importarConReintento(() => import("../utils/generarFormatos")).then((m) =>
-        m.procesarResultadosRps(archivo)
+        m.procesarResultadosRps(archivo, datos)
       ),
     resumenTexto: (r) => `${r.generados} de ${r.total} trabajadores tienen riesgo Alto o Muy alto — se generaron ${r.archivos} formatos.`,
     sinResultados: "Ningún trabajador tiene riesgo Alto o Muy alto según este archivo; no se generó ningún formato.",
@@ -26,7 +26,7 @@ const CONFIG = {
   },
 };
 
-export default function CargarResultados({ tipo, rol }) {
+export default function CargarResultados({ tipo, datos, rol }) {
   const config = CONFIG[tipo];
   const inputRef = useRef(null);
   const [estado, setEstado] = useState("idle"); // idle | procesando | listo | error | vacio
@@ -41,7 +41,7 @@ export default function CargarResultados({ tipo, rol }) {
     setEstado("procesando");
     setMensaje("");
     try {
-      const resumen = await config.procesar(archivo);
+      const resumen = await config.procesar(archivo, datos);
       if (resumen.generados === 0) {
         setEstado("vacio");
         setMensaje(config.sinResultados);

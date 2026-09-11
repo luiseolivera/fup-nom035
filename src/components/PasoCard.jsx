@@ -330,12 +330,24 @@ export default function PasoCard({
                           {act.linkLabel || "Abrir formato/recurso"}
                         </a>
                       )}
+                      {act.enlaces && (
+                        <div className="flex flex-col gap-1 mt-1">
+                          {act.enlaces.map((e) => (
+                            <a key={e.link} href={e.link} target="_blank" rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-xs font-medium hover:underline"
+                              style={{ color: "#1D3557" }}>
+                              <i className="ti ti-external-link text-sm"></i>
+                              {e.linkLabel || "Abrir formato/recurso"}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                       {act.generarPortada && <BotonDescargarPortada datos={datos} />}
                       {act.nota && (
                         <p className="text-xs mt-1 italic" style={{ color: "#2563eb" }}>({act.nota})</p>
                       )}
                       {act.cargarResultados && (
-                        <CargarResultados tipo={act.cargarResultados} rol={rol} />
+                        <CargarResultados tipo={act.cargarResultados} datos={datos} rol={rol} />
                       )}
                     </div>
                   </li>
